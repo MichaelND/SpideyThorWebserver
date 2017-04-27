@@ -29,7 +29,6 @@ def do_request(pid):
     totaltime = 0
     timeTaken = 0
     for i in range(0, int(REQUESTS)):
-        t=0
         t = time.time()
         requests.get(URL)
         timeTaken = time.time()-t
@@ -62,6 +61,10 @@ if __name__ == '__main__':
     URL = args.pop(0)
 
     # Create pool of workers and perform requests
+
+    if VERBOSE == True:
+        response = requests.get(URL)
+        print (response.content)
 
     totalavg = 0
     if PROCESSES == 1:
