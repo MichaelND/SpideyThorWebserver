@@ -32,12 +32,21 @@ accept_request(int sfd)
     socklen_t rlen;
 
     /* Allocate request struct (zeroed) */
-
+    r = calloc(1,sizeof(request));
     /* Accept a client */
-
+    int client_fd = accept(sfd, &raddr, &rlen);
+    if (client_fd < 0) {
+        fprintf(stderr, "Unable to accept: %s\n", strerror(errno));
+        return  NULL;
+    }
     /* Lookup client information */
-
+    getnameinfo(raddr, sizeof(raddr), r.host, sizeof(r.host), r.port, sizeof(r.port), 0);
     /* Open socket stream */
+    FILE *client_file = fdopen(client_fd, "w+");
+    if (client_file == NULL) {
+        fprintf(stderr, "Unable to fdopen: %s\n", strerror(errno));
+        close(client_fd);
+    }
 
     log("Accepted request from %s:%s", r->host, r->port);
     return r;
