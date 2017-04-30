@@ -14,6 +14,7 @@ char *MimeTypesPath   = "/etc/mime.types";
 char *DefaultMimeType = "text/plain";
 char *RootPath	      = "www";
 mode  ConcurrencyMode = SINGLE;
+char * PROGRAM_NAME = NULL;
 
 /**
  * Display usage message.
@@ -42,6 +43,26 @@ main(int argc, char *argv[])
     int sfd;
 
     /* Parse command line options */
+    PROGRAM_NAME = argv[0];
+    int argind = 1;
+    while (argind < argc && strlen(argv[argind]) > 1 && argv[argind][0] == '-') {
+        char * arg = argv[argind++];
+
+        if (arg[1] == 'h')
+            usage(PROGRAM_NAME, 0);
+        // else if (arg[1] == 'c')
+            //ConcurrencyMode = argv[argind++];
+        else if (arg[1] == 'm')
+            MimeTypesPath = argv[argind++];
+        else if (arg[1] == 'M')
+            DefaultMimeType = argv[argind++];
+        else if (arg[1] == 'p')
+            Port = argv[argind++];
+        else if (arg[1] == 'r')
+            RootPath = argv[argind++];
+        else 
+            usage(PROGRAM_NAME, 1);
+    }
 
     /* Listen to server socket */
 

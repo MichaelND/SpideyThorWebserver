@@ -22,15 +22,38 @@ socket_listen(const char *port)
     struct addrinfo *results;
     int    socket_fd = -1;
 
-    /* Lookup server address information */
+     /* Lookup server address information */
+    hints.ai_family = AF_UNSPEC; /* Return IPv4 and IPv6 choices */
+    hints.ai_socktype = SOCK_STREAM; /* Use TCP */
+    hints.ai_flags = AI_PASSIVE;  /* Use all interfaces */
 
+    int status;
+    if ((status = getaddrinfo(NULL, port, &hints, &results)) != 0) {
+        fprintf(stderr, "getaddrinfo failed: %s\n", gai_strerror(status));
+        return -1;
+    }
+
+    /* Allocate socket */
     /* For each server entry, allocate socket and try to connect */
     for (struct addrinfo *p = results; p != NULL && socket_fd < 0; p = p->ai_next) {
-	/* Allocate socket */
-
-	/* Bind socket */
-
-    	/* Listen to socket */
+        if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) {
+            fprintf(stderr, "Unable to make socket: %s\n", strerror(errno));
+            continue;
+        }
+        /* Bind socket */
+        if (bind(socket_fd, p->ai_addr, p->ai_addrlen) < 0) {
+            fprintf(stderr, "Unable to bind: %s\n", strerror(errno));
+            close(socket_fd);
+            socket_fd = -1;
+            continue;
+        }
+        /* Listen to socket */
+        if (listen(socket_fd, SOMAXCONN) < 0) {
+            fprintf(stderr, "Unable to listen: %s\n", strerror(errno));
+            close(socket_fd);
+            socket_fd = -1;
+            continue;
+        }
     }
 
     freeaddrinfo(results);
