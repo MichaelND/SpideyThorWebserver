@@ -64,6 +64,8 @@ main(int argc, char *argv[])
             usage(PROGRAM_NAME, 1);
     }
 
+    //a;sldkfja;klsj
+
     /* Listen to server socket */
 
     /* Determine real RootPath */
