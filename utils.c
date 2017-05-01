@@ -71,7 +71,11 @@ determine_request_path(const char *uri)
     char path[BUFSIZ];
     char real[BUFSIZ];
 
-    return strdup(real);
+    
+    if (strcmp(path,real) == 0) 
+        return strdup(real);
+    else 
+        return NULL;
 }
 
 /**
@@ -90,6 +94,18 @@ determine_request_type(const char *path)
 {
     struct stat s;
     request_type type;
+
+    if (lstat(path, &s) != 0) 
+        return REQUEST_BAD;
+
+    if ((s.st_mode & S_IFMT) == S_IFDIR)
+        type = REQUEST_BROWSE;
+    else if (access(path, X_OK))
+        type = REQUEST_CGI;
+    else if (access(path, R_OK))
+        type = REQUEST_FILE;
+    else
+        type = REQUEST_BAD;
 
     return (type);
 }

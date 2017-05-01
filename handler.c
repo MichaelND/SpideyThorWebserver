@@ -29,6 +29,7 @@ handle_request(struct request *r)
     http_status result;
 
     /* Parse request */
+    parse_request(r);
 
     /* Determine request path */
     debug("HTTP REQUEST PATH: %s", r->path);
