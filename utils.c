@@ -113,6 +113,13 @@ http_status_string(http_status status)
 char *
 skip_nonwhitespace(char *s)
 {
+    for (int i = 0; i < strlen(s); i++) {
+        if (isspace(s)) {
+            s = s[i];
+            return s;
+        }
+        
+    }
     return s;
 }
 
@@ -122,6 +129,12 @@ skip_nonwhitespace(char *s)
 char *
 skip_whitespace(char *s)
 {
+    for (int i = 0; i < strlen(s); i++) {
+        if (!isspace(s))
+            s = s[i];
+            return s[i];
+        
+    }
     return s;
 }
 

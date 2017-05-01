@@ -33,22 +33,23 @@ accept_request(int sfd)
 
     /* Allocate request struct (zeroed) */
     r = calloc(1,sizeof(struct request));
+    r->headers = NULL;
     /* Accept a client */
-    int client_fd = accept(sfd, &raddr, &rlen);
-    if (client_fd < 0) {
+    r->fd = accept(sfd, &raddr, &rlen);
+    if (r->fd < 0) {
         fprintf(stderr, "Unable to accept: %s\n", strerror(errno));
         goto fail;
     }
     /* Lookup client information */
-    if (getnameinfo(raddr, sizeof(raddr), r->host, sizeof(r.host), r->port, sizeof(r.port), NI_NUMERICHOST | NI_NUMERICSERVE) != 0) {
-        fprintf(stderr, "Unable to getnameinfo: %s\n", sterror(errno));
+    if (getnameinfo(&raddr, sizeof(raddr), r->host, sizeof(r->host), r->port, sizeof(r->port), NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
+        fprintf(stderr, "Unable to getnameinfo: %s\n", strerror(errno));
         goto fail;
     }
     /* Open socket stream */
-    FILE *client_file = fdopen(client_fd, "w+");
-    if (client_file == NULL) {
+    r->file = fdopen(r->fd, "w+");
+    if (r->file == NULL) {
         fprintf(stderr, "Unable to fdopen: %s\n", strerror(errno));
-        close(client_fd);
+        //close(client_fd);
         goto fail;
     }
 
@@ -80,12 +81,25 @@ free_request(struct request *r)
     }
 
     /* Close socket or fd */
+    close(r->fd);
 
     /* Free allocated strings */
+    free(r->host);
+    free(r->port);
+    free(r->method);
+    free(r->uri);
+
 
     /* Free headers */
+    while (r->headers->next) {
+        header = r->headers;
+        header = header->next;
+        free(header);
+    }
+    free(r->headers);
 
     /* Free request */
+    free(r);
 }
 
 /**
@@ -98,8 +112,12 @@ int
 parse_request(struct request *r)
 {
     /* Parse HTTP Request Method */
-
     /* Parse HTTP Requet Headers*/
+    
+    if (parse_request_method(r) == 0 && parse_request_headers(r) == 0)
+        return 0;
+    else 
+        return -1;
 }
 
 /**
@@ -120,12 +138,23 @@ int
 parse_request_method(struct request *r)
 {
     /* Read line from socket */
+    char buffer[BUFSIZ];
+    if (fgets(buffer, BUFSIZ, r->file) == NULL) {
+        debug("fgets failed");
+        return -1;
+    }
 
     /* Parse method and uri */
-
+    char * method = strtok(skip_whitespace(buffer)," \t\n");
+    char * uri = strtok(strchr(skip_whitespace(buffer), '/'), "?");
+    
     /* Parse query from uri */
+    char * query = strtok(strchr(buffer, '?'), " \t\n");
 
     /* Record method, uri, and query in request struct */
+    r->method = strdup(method);
+    r->uri = strdup(uri);
+    r->query = strdup(query);
 
     debug("HTTP METHOD: %s", r->method);
     debug("HTTP URI:    %s", r->uri);
@@ -170,6 +199,21 @@ parse_request_headers(struct request *r)
     char *value;
     
     /* Parse headers from socket */
+    if (fgets(buffer, BUFSIZ, r->file) == NULL) {
+        debug("fgets failed");
+        goto fail;
+    }
+    while (fgets(buffer, BUFSIZ, r->file) && strlen(buffer) > 2) {
+        curr = calloc(1,sizeof(struct request));
+        name = strtok(skip_whitespace(buffer),  ":");
+        chomp(name);
+        value = strtok(strchr(buffer, ':'), " \t\n");
+        chomp(value);
+        curr->name = name;
+        curr->value = value;
+        curr->next = r->headers;
+        r->headers = curr;
+    }
 
 #ifndef NDEBUG
     for (struct header *header = r->headers; header != NULL; header = header->next) {
