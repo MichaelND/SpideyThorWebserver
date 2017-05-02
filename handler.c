@@ -75,22 +75,17 @@ handle_browse_request(struct request *r)
     char str[BUFSIZ];
 
     /* Open a directory for reading or scanning */
-    //Dir * directory = opendir();
-
     directory = opendir(RootPath);
 
-    // if (directory == NULL) { //check if directory is openable
-    //     return HTTP_STATUS_NOT_FOUND;
-    // }
-
+    if (directory == NULL) { //check if directory is openable
+        return HTTP_STATUS_NOT_FOUND;
+    }
     /* Write HTTP Header with OK Status and text/html Content-Type */
     fprintf(r->file,"HTTP/1.0 %s\nContent-Type: test/html\n<html>\n<body>\n", HTTP_STATUS_OK);
-    //debug("HTTP HEADER %s = %s", HTTP_STATUS_OK, 
+
     /* For each entry in directory, emit HTML list item */
     n = scandir(RootPath, &entries, NULL, alphasort);
-    if (n == -1) {
-        
-    }
+
     int i = 0;
     fprintf(r->file, "<ul>\n");
     while (i < n) {
@@ -162,8 +157,17 @@ handle_cgi_request(struct request *r)
     char buffer[BUFSIZ];
     struct header *header;
 
-    /* Export CGI environment variables from request:
+    /* Export CGI environment variables from request: 
     * http://en.wikipedia.org/wiki/Common_Gateway_Interface */
+
+    header = r->headers;
+    while (header){
+        if (header.name == "Host")
+            
+        
+        header = header->next;
+    }
+    setenv("DOCUMENT_ROOT", RootPath, 1);
 
     /* Export CGI environment variables from request headers */
 

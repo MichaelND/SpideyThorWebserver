@@ -203,16 +203,21 @@ parse_request_headers(struct request *r)
         debug("fgets failed");
         goto fail;
     }
+    
+    curr = calloc(1,sizeof(struct header));
+    r->headers = curr;
     while (fgets(buffer, BUFSIZ, r->file) && strlen(buffer) > 2) {
-        curr = calloc(1,sizeof(struct request));
+        if (curr != NULL)
+            curr = calloc(1,sizeof(struct header));
+
         name = strtok(skip_whitespace(buffer),  ":");
         chomp(name);
         value = strtok(strchr(buffer, ':'), " \t\n");
         chomp(value);
+
         curr->name = name;
         curr->value = value;
-        curr->next = r->headers;
-        r->headers = curr;
+        curr = curr->next;
     }
 
 #ifndef NDEBUG

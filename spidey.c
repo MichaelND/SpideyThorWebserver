@@ -65,10 +65,13 @@ main(int argc, char *argv[])
     }
 
     /* Listen to server socket */
-    //listen_socket();
+    sfd = socket_listen(Port);
+    if (sfd < 0) {
+        printf("Failed socket listen");
+        return EXIT_FAILURE;
+    }
 
     /* Determine real RootPath */
-    setenv("DOCUMENT_ROOT", RootPath, 1);
 
     log("Listening on port %s", Port);
     debug("RootPath        = %s", RootPath);
