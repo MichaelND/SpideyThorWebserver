@@ -38,11 +38,29 @@ determine_mimetype(const char *path)
     FILE *fs = NULL;
     
     /* Find file extension */
+    ext = strrchr(path, '.');
+    if (ext == NULL) {
+        goto fail;
+        goto done;
+    }
+    ext++;
 
     /* Open MimeTypesPath file */
+    fs = fopen(MimeTypesPath, "r");
 
     /* Scan file for matching file extensions */
-   
+    while (fgets(buffer, sizeof(buffer), fs)) {
+        token = strtok((skip_whitespace(buffer), WHITESPACE));
+        char *fileExt = strtok(NULL, WHITESPACE);
+        if (fileExt) {
+            if (streq(fileExt, ext)) {
+                mimetype = token;
+                goto done;
+        }
+    }
+    goto fail;
+    goto done;
+
 fail:
     mimetype = DefaultMimeType;
 
