@@ -27,14 +27,32 @@ http_status
 handle_request(struct request *r)
 {
     http_status result;
+    request_type type;
+    char * path;
+    char * type_str;
 
     /* Parse request */
-    parse_request(r);
+    parse_request(r); 
 
     /* Determine request path */
-    debug("HTTP REQUEST PATH: %s", r->path);
+    path = determine_request_path(r->uri);
+    debug("HTTP REQUEST PATH: %s", path);
 
     /* Dispatch to appropriate request handler type */
+    type = determine_request_type(path);
+    if (type == REQUEST_BROWSE)
+        type_str = "BROWSE";
+    else if (type == REQUEST_CGI)
+        type_str = "CGI";
+    else if (type == REQUEST_FILE)
+        type_str = "FILE";
+    else if (type == REQUEST_BAD)
+        type_str = "BAD";
+
+    log("HTTP REQUEST TYPE: %s", type_str);
+
+    if (strcmp(http_status_string(result), "200 OK") != 0) //error has occurred
+        handle_error(result);
 
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
     return result;
@@ -55,12 +73,19 @@ handle_browse_request(struct request *r)
     int n;
 
     /* Open a directory for reading or scanning */
+    Dir * directory = opendir();
+
+    if (directory == NULL) { //check if directory is openable
+        return HTTP_STATUS_NOT_FOUND;
+    }
 
     /* Write HTTP Header with OK Status and text/html Content-Type */
 
     /* For each entry in directory, emit HTML list item */
 
     /* Flush socket, return OK */
+    closedir(directory); //close
+
     return HTTP_STATUS_OK;
 }
 

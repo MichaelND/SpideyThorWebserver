@@ -68,6 +68,7 @@ main(int argc, char *argv[])
     //listen_socket();
 
     /* Determine real RootPath */
+    setenv("DOCUMENT_ROOT", RootPath, 1);
 
     log("Listening on port %s", Port);
     debug("RootPath        = %s", RootPath);

@@ -41,7 +41,7 @@ accept_request(int sfd)
         goto fail;
     }
     /* Lookup client information */
-    if (getnameinfo(&raddr, sizeof(raddr), r->host, sizeof(r->host), r->port, sizeof(r->port), NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
+    if (getnameinfo(&raddr, sizeof(struct sockaddr), r->host, sizeof(r->host), r->port, sizeof(r->port), NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
         fprintf(stderr, "Unable to getnameinfo: %s\n", strerror(errno));
         goto fail;
     }
