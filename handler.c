@@ -84,7 +84,7 @@ handle_browse_request(struct request *r)
     // }
 
     /* Write HTTP Header with OK Status and text/html Content-Type */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: test/html\n<html>\n<body>", HTTP_STATUS_OK);
+    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: test/html\n<html>\n<body>\n", HTTP_STATUS_OK);
     //debug("HTTP HEADER %s = %s", HTTP_STATUS_OK, 
     /* For each entry in directory, emit HTML list item */
     n = scandir(RootPath, &entries, NULL, alphasort);
@@ -101,9 +101,6 @@ handle_browse_request(struct request *r)
     }
     fprintf(r->file, "</ul>\n</body>\n</hmtl>\n");
     /* Flush socket, return OK */
-
-    //closedir(directory); //close
-
     closedir(directory); //close
     shutdown(r->file, SHUT_WR);
 
@@ -132,12 +129,19 @@ handle_file_request(struct request *r)
         return HTTP_STATUS_NOT_FOUND;
     }
     /* Determine mimetype */
-    //determine_mimetype(RootPath);
+    mimetype = determine_mimetype(RootPath);
     /* Write HTTP Headers with OK status and determined Content-Type */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: test/html\n<html>\n<body>", HTTP_STATUS_OK); 
+    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: %s\n<html>\n<body>\n", HTTP_STATUS_OK, mimetype); 
     /* Read from file and write to socket in chunks */
-    while (
+    while (nread = fread(buffer,BUFSIZ,1,fs) != 0) {
+        fwrite(buffer, nread, 1, r->file);
+    }
+    fprintf(r->file, "</body>\n</hmtl>\n");
+
     /* Close file, flush socket, deallocate mimetype, return OK */
+    fclose(fs);
+    shutdown(r->file, SHUT_WR);
+    free(mimetype);
     return HTTP_STATUS_OK;
 }
 
