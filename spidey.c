@@ -72,7 +72,7 @@ main(int argc, char *argv[])
     }
 
     /* Determine real RootPath */
-
+    RootPath = determine_request_path(r->path); // or argument = RootPath 
     log("Listening on port %s", Port);
     debug("RootPath        = %s", RootPath);
     debug("MimeTypesPath   = %s", MimeTypesPath);

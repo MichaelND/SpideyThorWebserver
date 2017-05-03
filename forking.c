@@ -23,10 +23,14 @@ forking_server(int sfd)
     /* Accept and handle HTTP request */
     while (true) {
     	/* Accept request */
-
+        
 	/* Ignore children */
 
 	/* Fork off child process to handle request */
+        pid_t child = fork();
+        if (child < 0) {
+            fprintf(stderr, "Unable to fork request: %s\n" strerror(errno));
+        }
     }
 
     /* Close server socket and exit*/
