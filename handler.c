@@ -81,20 +81,20 @@ handle_browse_request(struct request *r)
         return HTTP_STATUS_NOT_FOUND;
     }
     /* Write HTTP Header with OK Status and text/html Content-Type */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: test/html\n<html>\n<body>\n", HTTP_STATUS_OK);
+    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: text/html\r\n<html>\n<body>\n", HTTP_STATUS_OK);
 
     /* For each entry in directory, emit HTML list item */
     n = scandir(RootPath, &entries, NULL, alphasort);
 
     int i = 0;
-    fprintf(r->file, "<ul>\n");
+    fprintf(r->file, "<h4>Directory:</h4>\n<ul>\n");
     while (i < n) {
         sprintf(str, "<li>%s</li>\n", entries[i]->d_name);
         fprintf(r->file,str);
         str[0] = 0; // resets str
         i++;
     }
-    fprintf(r->file, "</ul>\n</body>\n</hmtl>\n");
+    fprintf(r->file, "</ul>\n</body>\n</html>\n");
     /* Flush socket, return OK */
     closedir(directory); //close
     shutdown(r->file, SHUT_WR);
@@ -126,7 +126,7 @@ handle_file_request(struct request *r)
     /* Determine mimetype */
     mimetype = determine_mimetype(RootPath);
     /* Write HTTP Headers with OK status and determined Content-Type */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: %s\n<html>\n<body>\n", HTTP_STATUS_OK, mimetype); 
+    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: %s\r\n<html>\n<body>\n", HTTP_STATUS_OK, mimetype); 
     /* Read from file and write to socket in chunks */
     while (nread = fread(buffer,BUFSIZ,1,fs) != 0) {
         fwrite(buffer, nread, 1, r->file);
@@ -160,23 +160,46 @@ handle_cgi_request(struct request *r)
     /* Export CGI environment variables from request: 
     * http://en.wikipedia.org/wiki/Common_Gateway_Interface */
 
-    header = r->headers;
-    while (header){
-        if (header.name == "Host")
-            
-        
-        header = header->next;
-    }
-    setenv("DOCUMENT_ROOT", RootPath, 1);
+    setenv("QUERY_STRING", r->query, 1);
+    setenv("REMOTE_ADDR", r->host, 1);
+    setenv("REMOTE_PORT", r->port, 1);
+    setenv("REQUEST_URI", r->uri, 1);
+    setenv("REQUEST_METHOD", r->method, 1);
+    setenv("SCRIPT_FILENAME",r->path, 1);
 
     /* Export CGI environment variables from request headers */
+    setenv("DOCUMENT_ROOT", RootPath, 1);
+    header = r->headers;            
 
+    while (header) {
+        if (streq(header->name, "Port"))
+            setenv("SERVER_PORT", header->value, 1);
+        if (streq(header->name, "Host"))
+            setenv("HTTP_HOST", header->value, 1);
+        if (streq(header->name, "Accept"))
+            setenv("HTTP_ACCEPT", header->value, 1);
+        if (streq(header->name, "Accept-Language"))
+            setenv("HTTP_ACCEPT_LANGUAGE", header->value, 1);
+        if (streq(header->name, "Accept-Encoding"))
+            setenv("HTTP_ACCEPT_ENCODING", header->value, 1);
+        if (streq(header->name, "Connection"))
+            setenv("HTTP_CONNECTION", header->value, 1);
+        if (streq(header->name, "User-Agent"))
+            setenv("HTTP_USER_AGENT", header->value, 1);
+        header = header->next;
+    }
     /* POpen CGI Script */
 
+    char * command = sprintf("./%s", r->path);
+    pfs = popen(command, "r");
 
     /* Copy data from popen to socket */
-
+    while (fgets(buffer, BUFSIZ, pfs)) {
+        write(r->file, buffer, strlen(buffer));
+    }
     /* Close popen, flush socket, return OK */
+    pclose(pfs);
+    shutdown(r->file, SHUT_WR);
     return HTTP_STATUS_OK;
 }
 
@@ -192,9 +215,17 @@ handle_error(struct request *r, http_status status)
     const char *status_string = http_status_string(status);
 
     /* Write HTTP Header */
+    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: text/html\r\n<html>\n<body>\n", status_string);
 
     /* Write HTML Description of Error*/
-
+    if (strcmp(status_string, "400 Bad Request") == 0)
+        fprintf(r->file,"You made a bad request.");
+    else if (strcmp(status_string, "404 Not Found") == 0)
+        fprintf(r->file,"You can not find what you are looking for.");
+    else if (strcmp(status_string, "500 Internal Server Error") == 0)
+        fprintf(r->file,"Oops, there was a problem.");
+    
+    fprintf(r->file, "</body>\n</hmtl>\n");
     /* Return specified status */
     return status;
 }

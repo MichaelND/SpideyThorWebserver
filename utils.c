@@ -50,12 +50,13 @@ determine_mimetype(const char *path)
 
     /* Scan file for matching file extensions */
     while (fgets(buffer, sizeof(buffer), fs)) {
-        token = strtok((skip_whitespace(buffer), WHITESPACE));
+        token = strtok(skip_whitespace(buffer), WHITESPACE);
         char *fileExt = strtok(NULL, WHITESPACE);
         if (fileExt) {
             if (streq(fileExt, ext)) {
                 mimetype = token;
                 goto done;
+            }
         }
     }
     goto fail;
@@ -88,9 +89,9 @@ determine_request_path(const char *uri)
 {
     char path[BUFSIZ];
     char real[BUFSIZ];
-
-    //uri = realpath(uri, real);
-
+    sprintf(real, "%s/%s", RootPath, uri);
+    realpath(RootPath, path);
+    
     if (strcmp(path,real) == 0) 
         return strdup(real);
     else 
