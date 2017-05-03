@@ -50,8 +50,12 @@ main(int argc, char *argv[])
 
         if (arg[1] == 'h')
             usage(PROGRAM_NAME, 0);
-        // else if (arg[1] == 'c')
-            //ConcurrencyMode = argv[argind++];
+        else if (arg[1] == 'c')
+            char * temp = argv[argrind++];
+            if (streq(temp, "SINGLE")) ConcurrencyMode = SINGLE;
+            else if (streq(temp, "FORKING")) ConcurrencyMode = FORKING;
+            else
+                ConcurrencyMode = UNKNOWN;
         else if (arg[1] == 'm')
             MimeTypesPath = argv[argind++];
         else if (arg[1] == 'M')
@@ -72,7 +76,8 @@ main(int argc, char *argv[])
     }
 
     /* Determine real RootPath */
-    RootPath = determine_request_path(r->path); // or argument = RootPath 
+    RootPath = determine_request_path(RootPath); // Issues here 
+
     log("Listening on port %s", Port);
     debug("RootPath        = %s", RootPath);
     debug("MimeTypesPath   = %s", MimeTypesPath);
@@ -80,6 +85,7 @@ main(int argc, char *argv[])
     debug("ConcurrencyMode = %s", ConcurrencyMode == SINGLE ? "Single" : "Forking");
 
     /* Start either forking or single HTTP server */
+
     return EXIT_SUCCESS;
 }
 
