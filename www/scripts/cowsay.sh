@@ -1,4 +1,5 @@
 #!/bin/sh
+export PATH=$PATH:/afs/nd.edu/user15/pbui/pub/bin
 
 echo "HTTP/1.0 200 OK"
 echo "Content-type: text/html"

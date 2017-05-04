@@ -159,6 +159,7 @@ http_status_string(http_status status)
 char *
 skip_nonwhitespace(char *s)
 {
+    chomp(s);
     while (*s && !(isspace(s))) {
         s++;
     }
@@ -171,12 +172,10 @@ skip_nonwhitespace(char *s)
 char *
 skip_whitespace(char *s)
 {
-    debug("%s", s);
-    while (*s && isspace(s)) {
-        debug("%s",s);
-        (*s)++;
+    chomp(s);
+    while (*s && isspace(*s)) {
+        s++;
     }
-    debug("LOL");
     return s;
 }
 

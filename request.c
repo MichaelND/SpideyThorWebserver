@@ -152,18 +152,16 @@ parse_request_method(struct request *r)
     skip_whitespace(buffer);
     debug("%s", buffer);
 
-    debug("WHITESPACE WORKS");
 
     char * method = strtok(skip_whitespace(buffer), WHITESPACE);
-    debug("LOL");
-    char * uri = strtok(strchr(skip_whitespace(buffer), '/'), "?");
-    debug("LOL");
+    char * uri = strtok(NULL, " \t\n?");
     
     /* Parse query from uri */
-    char * query = strtok(strchr(buffer, '?'), WHITESPACE);
-
-    debug("LOL");
-
+    char * query = strtok(NULL, WHITESPACE);
+    // check if query null, if it is, set it equal to an empty string
+    if (streq(uri,"/")) {
+        query[0] = '\0';
+    }
     /* Record method, uri, and query in request struct */
     r->method = strdup(method);
     r->uri = strdup(uri);
@@ -207,31 +205,38 @@ int
 parse_request_headers(struct request *r)
 {
     struct header *curr = NULL;
+    struct header *next = NULL;
     char buffer[BUFSIZ];
     char *name;
     char *value;
-    
+    debug("headers"); 
     /* Parse headers from socket */
     if (fgets(buffer, BUFSIZ, r->file) == NULL) {
         debug("fgets failed");
         goto fail;
     }
-    
+    debug("%s", buffer);
     curr = calloc(1,sizeof(struct header));
+    curr->name = strtok(skip_whitespace(buffer), ":");
+    curr->value = strtok(NULL, "\n");
+    debug("NAME: %s", curr->name);
+    debug("VALUE: %s", curr->value);
     r->headers = curr;
     while (fgets(buffer, BUFSIZ, r->file) && strlen(buffer) > 2) {
         if (curr != NULL)
             curr = calloc(1,sizeof(struct header));
-
+        debug("%s", buffer); 
         name = strtok(skip_whitespace(buffer),  ":");
-        chomp(name);
-        value = strtok(strchr(buffer, ':'), " \t\n");
+        value = strtok(strchr(buffer, ':'), "\n");
         chomp(value);
-
-        curr->name = name;
-        curr->value = value;
-        curr = curr->next;
+        debug("NAME:  %s", name);
+        debug("VALUE: %s", value);
+        next->name = name;
+        next->value = value;
+        next = curr->next;
+        curr = next;
     }
+    debug("bottom of headers");
 
 #ifndef NDEBUG
     for (struct header *header = r->headers; header != NULL; header = header->next) {
