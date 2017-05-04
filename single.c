@@ -18,14 +18,21 @@ single_server(int sfd)
     /* Accept and handle HTTP request */
     while (true) {
     	/* Accept request */
-        accept_request(request);
-	/* Handle request */
+        debug("Accepting client request");
+        request = accept_request(sfd);
+        if (request == NULL)
+            continue;
+
+    	/* Handle request */
+        debug("Handling client request");
         handle_request(request);
-	/* Free request */
+
+    	/* Free request */
         free_request(request);
     } 
     /* Close socket and exit */
-    shutdown(request->fd, 2);
+    fclose(sfd);
+    //shutdown(request->fd, 2);
     exit(EXIT_SUCCESS);
 }
 

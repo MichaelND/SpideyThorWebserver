@@ -39,7 +39,6 @@ usage(const char *progname, int status)
 int
 main(int argc, char *argv[])
 {
-    int c;
     int sfd;
 
     /* Parse command line options */
@@ -50,12 +49,17 @@ main(int argc, char *argv[])
 
         if (arg[1] == 'h')
             usage(PROGRAM_NAME, 0);
-        else if (arg[1] == 'c')
-            char * temp = argv[argrind++];
-            if (streq(temp, "SINGLE")) ConcurrencyMode = SINGLE;
-            else if (streq(temp, "FORKING")) ConcurrencyMode = FORKING;
+        else if (arg[1] == 'c') {
+            char * temp = argv[argind++];
+            if (streq(temp, "SINGLE")) {
+                ConcurrencyMode = SINGLE;
+            }
+            else if (streq(temp, "FORKING")) { 
+                ConcurrencyMode = FORKING;
+            }
             else
                 ConcurrencyMode = UNKNOWN;
+        }
         else if (arg[1] == 'm')
             MimeTypesPath = argv[argind++];
         else if (arg[1] == 'M')
@@ -76,7 +80,7 @@ main(int argc, char *argv[])
     }
 
     /* Determine real RootPath */
-    RootPath = determine_request_path(RootPath); // Issues here 
+    RootPath = realpath(RootPath, NULL); // Issues here 
 
     log("Listening on port %s", Port);
     debug("RootPath        = %s", RootPath);
