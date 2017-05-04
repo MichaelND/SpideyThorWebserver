@@ -31,7 +31,7 @@ single_server(int sfd)
         free_request(request);
     } 
     /* Close socket and exit */
-    fclose(sfd);
+    fclose(request->file);
     //shutdown(request->fd, 2);
     exit(EXIT_SUCCESS);
 }

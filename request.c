@@ -141,7 +141,7 @@ parse_request_method(struct request *r)
     char buffer[BUFSIZ];
     if (fgets(buffer, BUFSIZ, r->file) == NULL) {
         debug("fgets failed");
-        return -1;
+        goto fail;
     }
 
     /* Parse method and uri */

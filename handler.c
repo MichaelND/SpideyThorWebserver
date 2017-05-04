@@ -32,24 +32,38 @@ handle_request(struct request *r)
     char * type_str;
 
     /* Parse request */
-    parse_request(r); 
-
+    if (parse_request(r) == -1) {
+        handle_error(r, HTTP_STATUS_BAD_REQUEST);
+    }
+    
     /* Determine request path */
     path = determine_request_path(r->uri);
+    if (path == NULL) {
+        handle_error(r, HTTP_STATUS_NOT_FOUND);
+    }
     debug("HTTP REQUEST PATH: %s", path);
 
     /* Dispatch to appropriate request handler type */
     type = determine_request_type(path);
-    if (type == REQUEST_BROWSE)
+    if (type == REQUEST_BROWSE) {
         type_str = "BROWSE";
-    else if (type == REQUEST_CGI)
+        result = handle_browse_request(r);
+    }
+    else if (type == REQUEST_CGI) {
         type_str = "CGI";
-    else if (type == REQUEST_FILE)
+        result = handle_cgi_request(r);
+    }
+    else if (type == REQUEST_FILE) {
         type_str = "FILE";
-    else if (type == REQUEST_BAD)
+        result = handle_file_request(r);
+    }
+    else if (type == REQUEST_BAD) {
         type_str = "BAD";
+        result = handle_error(r, HTTP_STATUS_NOT_FOUND);
+    }
 
     debug("HTTP REQUEST TYPE: %s", type_str);
+
 
     if (strcmp(http_status_string(result), "200 OK") != 0) //error has occurred
         handle_error(r, result);
@@ -81,7 +95,7 @@ handle_browse_request(struct request *r)
         return HTTP_STATUS_NOT_FOUND;
     }
     /* Write HTTP Header with OK Status and text/html Content-Type */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: text/html\r\n<html>\n<body>\n", HTTP_STATUS_OK);
+    fprintf(r->file,"HTTP/1.0 %i\nContent-Type: text/html\r\n<html>\n<body>\n", HTTP_STATUS_OK);
 
     /* For each entry in directory, emit HTML list item */
     n = scandir(RootPath, &entries, NULL, alphasort);
@@ -97,7 +111,7 @@ handle_browse_request(struct request *r)
     fprintf(r->file, "</ul>\n</body>\n</html>\n");
     /* Flush socket, return OK */
     closedir(directory); //close
-    shutdown(r->file, SHUT_WR);
+    shutdown(r->fd, SHUT_WR);
 
     return HTTP_STATUS_OK;
 }
@@ -126,16 +140,16 @@ handle_file_request(struct request *r)
     /* Determine mimetype */
     mimetype = determine_mimetype(RootPath);
     /* Write HTTP Headers with OK status and determined Content-Type */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: %s\r\n<html>\n<body>\n", HTTP_STATUS_OK, mimetype); 
+    fprintf(r->file,"HTTP/1.0 %i\nContent-Type: %s\r\n<html>\n<body>\n", HTTP_STATUS_OK, mimetype); 
     /* Read from file and write to socket in chunks */
-    while (nread = fread(buffer,BUFSIZ,1,fs) != 0) {
+    while ((nread = fread(buffer,BUFSIZ,1,fs)) != 0) {
         fwrite(buffer, nread, 1, r->file);
     }
     fprintf(r->file, "</body>\n</hmtl>\n");
 
     /* Close file, flush socket, deallocate mimetype, return OK */
     fclose(fs);
-    shutdown(r->file, SHUT_WR);
+    shutdown(r->fd, SHUT_WR);
     free(mimetype);
     return HTTP_STATUS_OK;
 }
@@ -156,6 +170,7 @@ handle_cgi_request(struct request *r)
     FILE *pfs;
     char buffer[BUFSIZ];
     struct header *header;
+    char command[BUFSIZ];
 
     /* Export CGI environment variables from request: 
     * http://en.wikipedia.org/wiki/Common_Gateway_Interface */
@@ -190,16 +205,16 @@ handle_cgi_request(struct request *r)
     }
     /* POpen CGI Script */
 
-    char * command = sprintf("./%s", r->path);
+    sprintf(command, "./%s", r->path);
     pfs = popen(command, "r");
 
     /* Copy data from popen to socket */
     while (fgets(buffer, BUFSIZ, pfs)) {
-        write(r->file, buffer, strlen(buffer));
+        write(r->fd, buffer, strlen(buffer));
     }
     /* Close popen, flush socket, return OK */
     pclose(pfs);
-    shutdown(r->file, SHUT_WR);
+    shutdown(r->fd, SHUT_WR);
     return HTTP_STATUS_OK;
 }
 

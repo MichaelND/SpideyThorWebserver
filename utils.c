@@ -159,8 +159,8 @@ char *
 skip_nonwhitespace(char *s)
 {
     for (int i = 0; i < strlen(s); i++) {
+        s++;
         if (isspace(s)) {
-            s = s[i];
             return s;
         }
         
@@ -175,9 +175,9 @@ char *
 skip_whitespace(char *s)
 {
     for (int i = 0; i < strlen(s); i++) {
+        s++;
         if (!isspace(s))
-            s = s[i];
-            return s[i];
+            return s;
         
     }
     return s;

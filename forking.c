@@ -19,7 +19,6 @@ void
 forking_server(int sfd)
 {
     struct request *request;
-    pid_t pid;
 
     /* Accept and handle HTTP request */
     while (true) {
@@ -33,7 +32,7 @@ forking_server(int sfd)
         pid_t child = fork();
         if (child < 0) {
             fprintf(stderr, "Unable to fork request: %s\n", strerror(errno));
-            fclose(request);
+            fclose(request->file);
             continue;
         }
     	/* Fork off child process to handle request */
@@ -41,11 +40,11 @@ forking_server(int sfd)
             /* Handle client request */
             debug("Handling client request");
             handle_request(request);
-            fclose(request);
+            fclose(request->file);
             exit(EXIT_SUCCESS);
         } 
         else {        // Parent
-            fclose(request);
+            fclose(request->file);
         }
 
     }
