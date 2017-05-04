@@ -145,8 +145,6 @@ parse_request_method(struct request *r)
         goto fail;
     }
 
-    debug("LOL");
-
     /* Parse method and uri */
     debug("%s", buffer);
     skip_whitespace(buffer);
