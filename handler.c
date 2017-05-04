@@ -111,7 +111,7 @@ handle_browse_request(struct request *r)
     fprintf(r->file, "</ul>\n</body>\n</html>\n");
     /* Flush socket, return OK */
     closedir(directory); //close
-    shutdown(r->fd, SHUT_WR);
+    fflush(r->file);
 
     return HTTP_STATUS_OK;
 }
@@ -149,7 +149,7 @@ handle_file_request(struct request *r)
 
     /* Close file, flush socket, deallocate mimetype, return OK */
     fclose(fs);
-    shutdown(r->fd, SHUT_WR);
+    fflush(r->file);
     free(mimetype);
     return HTTP_STATUS_OK;
 }
@@ -214,7 +214,7 @@ handle_cgi_request(struct request *r)
     }
     /* Close popen, flush socket, return OK */
     pclose(pfs);
-    shutdown(r->fd, SHUT_WR);
+    fflush(r->file);
     return HTTP_STATUS_OK;
 }
 

@@ -29,9 +29,8 @@ single_server(int sfd)
         free_request(request);
     } 
     /* Close socket and exit */
-    fclose(request->file);
-    //shutdown(request->fd, 2);
-    exit(EXIT_SUCCESS);
+    close(sfd);
+    return;
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */

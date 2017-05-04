@@ -29,7 +29,9 @@ forking_server(int sfd)
         
     	/* Ignore children */
         pid_t child = fork();
-        debug("Child Process: %s", child);
+        if (child > 0)
+            debug("Child Process: %d", (int)child);
+
         if (child < 0) {
             fprintf(stderr, "Unable to fork request: %s\n", strerror(errno));
             fclose(request->file);
@@ -46,10 +48,9 @@ forking_server(int sfd)
             fclose(request->file);
         }
     }
-
     /* Close server socket and exit*/
     close(sfd);
-    return exit(EXIT_SUCCESS);
+    return;
 }
 
 /* vim: set expandtab sts=4 sw=4 ts=8 ft=c: */
