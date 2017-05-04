@@ -205,12 +205,12 @@ int
 parse_request_headers(struct request *r)
 {
     struct header *curr = NULL;
-    struct header *next = NULL;
     char buffer[BUFSIZ];
     char *name;
     char *value;
     debug("headers"); 
     /* Parse headers from socket */
+    /*
     if (fgets(buffer, BUFSIZ, r->file) == NULL) {
         debug("fgets failed");
         goto fail;
@@ -222,21 +222,21 @@ parse_request_headers(struct request *r)
     debug("NAME: %s", curr->name);
     debug("VALUE: %s", curr->value);
     r->headers = curr;
+    */
     while (fgets(buffer, BUFSIZ, r->file) && strlen(buffer) > 2) {
-        if (curr != NULL)
-            curr = calloc(1,sizeof(struct header));
+        curr = calloc(1,sizeof(struct header));
+        if (curr == NULL) goto fail;
         debug("%s", buffer); 
         name = strtok(skip_whitespace(buffer),  ":");
-        value = strtok(strchr(buffer, ':'), "\n");
+        value = strtok(NULL, "\n");
         chomp(value);
-        debug("NAME:  %s", name);
-        debug("VALUE: %s", value);
-        next->name = name;
-        next->value = value;
-        next = curr->next;
-        curr = next;
+        if (value == NULL) goto fail;
+        curr->name = strdup(name);
+        curr->value = strdup(value);
+        curr->next = r->headers;
+        r->headers = curr;
     }
-    debug("bottom of headers");
+    
 
 #ifndef NDEBUG
     for (struct header *header = r->headers; header != NULL; header = header->next) {
