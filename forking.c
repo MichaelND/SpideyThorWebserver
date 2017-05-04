@@ -23,13 +23,13 @@ forking_server(int sfd)
     /* Accept and handle HTTP request */
     while (true) {
         /* Accept request */
-        debug("Accepting client request");
         request = accept_request(sfd);
         if (request == NULL)
             continue;
         
     	/* Ignore children */
         pid_t child = fork();
+        debug("Child Process: %s", child);
         if (child < 0) {
             fprintf(stderr, "Unable to fork request: %s\n", strerror(errno));
             fclose(request->file);
@@ -38,7 +38,6 @@ forking_server(int sfd)
     	/* Fork off child process to handle request */
         if (child == 0) { // Child
             /* Handle client request */
-            debug("Handling client request");
             handle_request(request);
             fclose(request->file);
             exit(EXIT_SUCCESS);
@@ -46,7 +45,6 @@ forking_server(int sfd)
         else {        // Parent
             fclose(request->file);
         }
-
     }
 
     /* Close server socket and exit*/

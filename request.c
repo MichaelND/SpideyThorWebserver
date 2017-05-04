@@ -50,7 +50,7 @@ accept_request(int sfd)
     r->file = fdopen(r->fd, "w+");
     if (r->file == NULL) {
         fprintf(stderr, "Unable to fdopen: %s\n", strerror(errno));
-        //close(client_fd);
+        close(r->fd);
         goto fail;
     }
 
@@ -75,8 +75,6 @@ fail:
 void
 free_request(struct request *r)
 {
-    struct header *header;
-
     if (r == NULL) {
     	return;
     }
@@ -85,16 +83,11 @@ free_request(struct request *r)
     close(r->fd);
 
     /* Free allocated strings */
-    free(r->host);
-    free(r->port);
     free(r->method);
     free(r->uri);
 
-
     /* Free headers */
-    while (r->headers->next) {
-        header = r->headers;
-        header = header->next;
+    for (struct header *header = r->headers; header != NULL; header = header->next) {
         free(header);
     }
     free(r->headers);
@@ -146,20 +139,17 @@ parse_request_method(struct request *r)
     }
 
     /* Parse method and uri */
-    debug("%s", buffer);
-    skip_whitespace(buffer);
-    debug("%s", buffer);
-
-
     char * method = strtok(skip_whitespace(buffer), WHITESPACE);
-    char * uri = strtok(NULL, " \t\n?");
-    
+    char * uri = strtok(NULL, WHITESPACE);
+
     /* Parse query from uri */
-    char * query = strtok(NULL, WHITESPACE);
-    // check if query null, if it is, set it equal to an empty string
-    if (streq(uri,"/")) {
-        query[0] = '\0';
+    char * query = NULL;
+    if (strchr(uri, '?') != NULL) { //then query is in uri
+        query = strtok(strchr(uri, '?'), WHITESPACE);
     }
+    else // check if query null, if it is, set it equal to an empty string
+        query = "";
+    
     /* Record method, uri, and query in request struct */
     r->method = strdup(method);
     r->uri = strdup(uri);
@@ -206,25 +196,11 @@ parse_request_headers(struct request *r)
     char buffer[BUFSIZ];
     char *name;
     char *value;
-    debug("headers"); 
+
     /* Parse headers from socket */
-    /*
-    if (fgets(buffer, BUFSIZ, r->file) == NULL) {
-        debug("fgets failed");
-        goto fail;
-    }
-    debug("%s", buffer);
-    curr = calloc(1,sizeof(struct header));
-    curr->name = strtok(skip_whitespace(buffer), ":");
-    curr->value = strtok(NULL, "\n");
-    debug("NAME: %s", curr->name);
-    debug("VALUE: %s", curr->value);
-    r->headers = curr;
-    */
     while (fgets(buffer, BUFSIZ, r->file) && strlen(buffer) > 2) {
         curr = calloc(1,sizeof(struct header));
-        if (curr == NULL) goto fail;
-        debug("%s", buffer); 
+        if (curr == NULL) goto fail; 
         name = strtok(skip_whitespace(buffer),  ":");
         value = strtok(NULL, "\n");
         chomp(value);
@@ -234,7 +210,6 @@ parse_request_headers(struct request *r)
         curr->next = r->headers;
         r->headers = curr;
     }
-    
 
 #ifndef NDEBUG
     for (struct header *header = r->headers; header != NULL; header = header->next) {

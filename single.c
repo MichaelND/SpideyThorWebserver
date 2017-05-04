@@ -18,13 +18,11 @@ single_server(int sfd)
     /* Accept and handle HTTP request */
     while (true) {
     	/* Accept request */
-        debug("Accepting client request");
         request = accept_request(sfd);
         if (request == NULL)
             continue;
 
     	/* Handle request */
-        debug("Handling client request");
         handle_request(request);
 
     	/* Free request */

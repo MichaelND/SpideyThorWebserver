@@ -51,10 +51,10 @@ main(int argc, char *argv[])
             usage(PROGRAM_NAME, 0);
         else if (arg[1] == 'c') {
             char * temp = argv[argind++];
-            if (streq(temp, "SINGLE")) {
+            if (streq(temp, "single")) {
                 ConcurrencyMode = SINGLE;
             }
-            else if (streq(temp, "FORKING")) { 
+            else if (streq(temp, "forking")) { 
                 ConcurrencyMode = FORKING;
             }
             else
