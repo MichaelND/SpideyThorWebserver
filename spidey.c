@@ -89,7 +89,15 @@ main(int argc, char *argv[])
     debug("ConcurrencyMode = %s", ConcurrencyMode == SINGLE ? "Single" : "Forking");
 
     /* Start either forking or single HTTP server */
-
+    if (ConcurrencyMode == SINGLE) {
+        single_server(sfd);
+    }
+    else if (ConcurrencyMode == FORKING) {
+        forking_server(sfd);
+    }
+    else {
+        printf("UNKNOWN ConcurrencyMode");
+    }
     return EXIT_SUCCESS;
 }
 
