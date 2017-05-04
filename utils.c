@@ -3,6 +3,7 @@
 #include "spidey.h"
 
 #include <ctype.h>
+#include <stdio.h>
 #include <errno.h>
 #include <string.h>
 
@@ -158,12 +159,8 @@ http_status_string(http_status status)
 char *
 skip_nonwhitespace(char *s)
 {
-    for (int i = 0; i < strlen(s); i++) {
+    while (*s && !(isspace(s))) {
         s++;
-        if (isspace(s)) {
-            return s;
-        }
-        
     }
     return s;
 }
@@ -174,12 +171,12 @@ skip_nonwhitespace(char *s)
 char *
 skip_whitespace(char *s)
 {
-    for (int i = 0; i < strlen(s); i++) {
-        s++;
-        if (!isspace(s))
-            return s;
-        
+    debug("%s", s);
+    while (*s && isspace(s)) {
+        debug("%s",s);
+        (*s)++;
     }
+    debug("LOL");
     return s;
 }
 

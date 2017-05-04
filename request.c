@@ -41,7 +41,8 @@ accept_request(int sfd)
         goto fail;
     }
     /* Lookup client information */
-    if (getnameinfo(&raddr, sizeof(struct sockaddr), r->host, sizeof(r->host), r->port, sizeof(r->port), NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
+    rlen = sizeof(struct sockaddr);
+    if (getnameinfo(&raddr, rlen, r->host, sizeof(r->host), r->port, sizeof(r->port), NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
         fprintf(stderr, "Unable to getnameinfo: %s\n", strerror(errno));
         goto fail;
     }
@@ -144,12 +145,24 @@ parse_request_method(struct request *r)
         goto fail;
     }
 
+    debug("LOL");
+
     /* Parse method and uri */
-    char * method = strtok(skip_whitespace(buffer)," \t\n");
+    debug("%s", buffer);
+    skip_whitespace(buffer);
+    debug("%s", buffer);
+
+    debug("WHITESPACE WORKS");
+
+    char * method = strtok(skip_whitespace(buffer), WHITESPACE);
+    debug("LOL");
     char * uri = strtok(strchr(skip_whitespace(buffer), '/'), "?");
+    debug("LOL");
     
     /* Parse query from uri */
-    char * query = strtok(strchr(buffer, '?'), " \t\n");
+    char * query = strtok(strchr(buffer, '?'), WHITESPACE);
+
+    debug("LOL");
 
     /* Record method, uri, and query in request struct */
     r->method = strdup(method);

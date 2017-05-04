@@ -35,6 +35,7 @@ handle_request(struct request *r)
     if (parse_request(r) == -1) {
         handle_error(r, HTTP_STATUS_BAD_REQUEST);
     }
+    debug("HELLO");
     
     /* Determine request path */
     path = determine_request_path(r->uri);
