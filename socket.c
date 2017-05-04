@@ -18,14 +18,16 @@
 int
 socket_listen(const char *port)
 {
-    struct addrinfo  hints;
     struct addrinfo *results;
     int    socket_fd = -1;
 
      /* Lookup server address information */
-    hints.ai_family = AF_UNSPEC; /* Return IPv4 and IPv6 choices */
-    hints.ai_socktype = SOCK_STREAM; /* Use TCP */
-    hints.ai_flags = AI_PASSIVE;  /* Use all interfaces */
+     struct addrinfo  hints = {
+        .ai_family   = AF_UNSPEC,   /* Return IPv4 and IPv6 choices */
+        .ai_socktype = SOCK_STREAM, /* Use TCP */
+        .ai_flags    = AI_PASSIVE,  /* Use all interfaces */
+    };
+
 
     int status;
     if ((status = getaddrinfo(NULL, port, &hints, &results)) != 0) {
