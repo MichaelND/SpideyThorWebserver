@@ -87,10 +87,11 @@ handle_browse_request(struct request *r)
     int n;
     DIR * directory;
     char str[BUFSIZ];
-    char link[BUFSIZ];
+    
+    debug("URI: %s", r->uri);
 
     /* Open a directory for reading or scanning */
-    directory = opendir(RootPath);
+    directory = opendir(r->path);
 
     if (directory == NULL) { //check if directory is openable
         return HTTP_STATUS_NOT_FOUND;
@@ -101,15 +102,16 @@ handle_browse_request(struct request *r)
     /* For each entry in directory, emit HTML list item */
     n = scandir(RootPath, &entries, NULL, alphasort);
 
+    debug("RootPath: %s", RootPath);
+
     int i = 0;
     fprintf(r->file, "<h4>Directory:</h4>\n<ul>\n");
     while (i < n) {
         if (strcmp(entries[i]->d_name, ".")!=0) {
-            sprintf(link, r->uri, entries[i]->d_name);
-            sprintf(str, "<li><a href=\"%s\">%s</a></li>\n", link, entries[i]->d_name);
+            debug("URI: %s", r->uri);
+            sprintf(str, "<li><a href=\"%s/%s\">%s</a></li>\n", streq(r->uri, "/") ? "" : r->uri, entries[i]->d_name, entries[i]->d_name);
             fprintf(r->file,str);
         }
-        link[0] = 0;
         str[0] = 0; // resets str
         i++;
     }

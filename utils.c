@@ -101,11 +101,13 @@ done:
 char *
 determine_request_path(const char *uri)
 {
+    char path[BUFSIZ];
     char real[BUFSIZ];
 
-    realpath(RootPath, real);
+    sprintf(path, "%s/%s", RootPath, uri);
+    realpath(path, real);
     
-    if (strcmp("www", real)) 
+    if (strncmp(RootPath, real, strlen(RootPath)) == 0) 
         return strdup(real);
     else 
         return NULL;
