@@ -30,6 +30,7 @@ def do_request(pid):
     timeTaken = 0
     for i in range(0, int(REQUESTS)):
         t = time.time()
+        print(URL)
         requests.get(URL)
         timeTaken = time.time()-t
         totaltime = totaltime + timeTaken
