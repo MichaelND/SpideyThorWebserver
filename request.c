@@ -29,7 +29,7 @@ accept_request(int sfd)
 {
     struct request *r;
     struct sockaddr raddr;
-    socklen_t rlen;
+    socklen_t rlen = sizeof(struct sockaddr);
 
     /* Allocate request struct (zeroed) */
     r = calloc(1, sizeof(struct request));
@@ -41,7 +41,7 @@ accept_request(int sfd)
         goto fail;
     }
     /* Lookup client information */
-    rlen = sizeof(struct sockaddr);
+   
     if (getnameinfo(&raddr, rlen, r->host, sizeof(r->host), r->port, sizeof(r->port), (NI_NUMERICHOST | NI_NUMERICSERV)) != 0) {
         fprintf(stderr, "Unable to getnameinfo: %s\n", strerror(errno));
         goto fail;
@@ -80,10 +80,11 @@ free_request(struct request *r)
     }
 
     /* Close socket or fd */
-    if (r->fd) 
-        close(r->fd);
     if (r->file)
         fclose(r->file);
+    else if (r->fd >= 0) 
+        close(r->fd);
+
 
     /* Free allocated strings */
     free(r->query);

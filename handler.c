@@ -95,7 +95,7 @@ handle_browse_request(struct request *r)
         return HTTP_STATUS_NOT_FOUND;
     }
     /* Write HTTP Header with OK Status and text/html Content-Type */
-    fprintf(r->file,"HTTP/1.0 %i\nContent-Type: text/html\r\n<html>\n<body>\n", HTTP_STATUS_OK);
+    fprintf(r->file,"HTTP/1.0 %i\nContent-Type: text/html\n\r\n<html>\n<body>\n", HTTP_STATUS_OK);
 
     /* For each entry in directory, emit HTML list item */
     n = scandir(RootPath, &entries, NULL, alphasort);
