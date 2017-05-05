@@ -107,10 +107,12 @@ determine_request_path(const char *uri)
     sprintf(path, "%s/%s", RootPath, uri);
     realpath(path, real);
     
-    if (strncmp(RootPath, real, strlen(RootPath)) == 0) 
+    if (strncmp(RootPath, real, strlen(RootPath)) == 0) {
         return strdup(real);
-    else 
+    }
+    else {
         return NULL;
+    }
 }
 
 /**
@@ -135,9 +137,9 @@ determine_request_type(const char *path)
 
     if ((s.st_mode & S_IFMT) == S_IFDIR)
         type = REQUEST_BROWSE;
-    else if (access(path, X_OK))
+    else if (access(path, X_OK) == 0)
         type = REQUEST_CGI;
-    else if (access(path, R_OK))
+    else if (access(path, R_OK) == 0)
         type = REQUEST_FILE;
     else
         type = REQUEST_BAD;

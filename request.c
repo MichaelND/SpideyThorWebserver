@@ -154,8 +154,10 @@ parse_request_method(struct request *r)
 
     /* Parse query from uri */
     char * query = NULL;
-    if (strchr(uri, '?') != NULL) { //then query is in uri
-        query = strtok(strchr(uri, '?'), WHITESPACE);
+    query = strchr(uri, '?');
+    if (query) { //then query is in uri
+        *query = 0;
+        query++;
     }
     else // check if query null, if it is, set it equal to an empty string
         query = "";
