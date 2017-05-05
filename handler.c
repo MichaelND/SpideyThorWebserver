@@ -65,8 +65,8 @@ handle_request(struct request *r)
 
     debug("HTTP REQUEST TYPE: %s", type_str);
 
-    if (strcmp(http_status_string(result), "200 OK") != 0) //error has occurred
-        handle_error(r, result);
+    //if (strcmp(http_status_string(result), "200 OK") != 0) //error has occurred
+    //    handle_error(r, result);
 
     log("HTTP REQUEST STATUS: %s", http_status_string(result));
     return result;
@@ -228,17 +228,18 @@ handle_error(struct request *r, http_status status)
     const char *status_string = http_status_string(status);
 
     /* Write HTTP Header */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: text/html\r\n<html>\n<body>\n", status_string);
+    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: text/html\n\r\n<html>\n<body>\n", status_string);
 
     /* Write HTML Description of Error*/
     if (strcmp(status_string, "400 Bad Request") == 0)
-        fprintf(r->file,"You made a bad request.");
+        fprintf(r->file,"You made a bad request.\n");
     else if (strcmp(status_string, "404 Not Found") == 0)
-        fprintf(r->file,"You can not find what you are looking for.");
+        fprintf(r->file,"You cannot find what you are looking for.\n");
     else if (strcmp(status_string, "500 Internal Server Error") == 0)
-        fprintf(r->file,"Oops, there was a problem.");
+        fprintf(r->file,"Oops, there was a problem.\n");
     
-    fprintf(r->file, "</body>\n</hmtl>\n");
+    fprintf(r->file, "</body>\n</html>\n");
+    
     /* Return specified status */
     return status;
 }
