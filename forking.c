@@ -41,11 +41,11 @@ forking_server(int sfd)
         if (child == 0) { // Child
             /* Handle client request */
             handle_request(request);
-            fclose(request->file);
+            free_request(request);
             exit(EXIT_SUCCESS);
         } 
         else {        // Parent
-            fclose(request->file);
+            free_request(request);
         }
     }
     /* Close server socket and exit*/

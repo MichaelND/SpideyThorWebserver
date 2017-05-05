@@ -32,7 +32,7 @@ accept_request(int sfd)
     socklen_t rlen;
 
     /* Allocate request struct (zeroed) */
-    r = calloc(1,sizeof(struct request));
+    r = calloc(1, sizeof(struct request));
     r->headers = NULL;
     /* Accept a client */
     r->fd = accept(sfd, &raddr, &rlen);
@@ -42,7 +42,7 @@ accept_request(int sfd)
     }
     /* Lookup client information */
     rlen = sizeof(struct sockaddr);
-    if (getnameinfo(&raddr, rlen, r->host, sizeof(r->host), r->port, sizeof(r->port), NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
+    if (getnameinfo(&raddr, rlen, r->host, sizeof(r->host), r->port, sizeof(r->port), (NI_NUMERICHOST | NI_NUMERICSERV)) != 0) {
         fprintf(stderr, "Unable to getnameinfo: %s\n", strerror(errno));
         goto fail;
     }
@@ -50,7 +50,6 @@ accept_request(int sfd)
     r->file = fdopen(r->fd, "w+");
     if (r->file == NULL) {
         fprintf(stderr, "Unable to fdopen: %s\n", strerror(errno));
-        close(r->fd);
         goto fail;
     }
 
@@ -75,20 +74,30 @@ fail:
 void
 free_request(struct request *r)
 {
+    struct header *header;
     if (r == NULL) {
     	return;
     }
 
     /* Close socket or fd */
-    close(r->fd);
+    if (r->fd) 
+        close(r->fd);
+    if (r->file)
+        fclose(r->file);
 
     /* Free allocated strings */
+    free(r->query);
     free(r->method);
     free(r->uri);
+    free(r->path);
 
     /* Free headers */
-    for (struct header *header = r->headers; header != NULL; header = header->next) {
-        free(header);
+    header = r->headers;
+    while (header != NULL) {
+        struct header * next = header->next;
+        free(header->name);
+        free(header->value);
+        header = next;
     }
     free(r->headers);
 

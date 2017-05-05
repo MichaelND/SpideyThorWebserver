@@ -92,7 +92,7 @@ determine_request_path(const char *uri)
 
     realpath(RootPath, real);
     
-    if (strcmp("www",real)) 
+    if (strcmp("www", real)) 
         return strdup(real);
     else 
         return NULL;
