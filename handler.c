@@ -103,8 +103,10 @@ handle_browse_request(struct request *r)
     int i = 0;
     fprintf(r->file, "<h4>Directory:</h4>\n<ul>\n");
     while (i < n) {
-        sprintf(str, "<li>%s</li>\n", entries[i]->d_name);
-        fprintf(r->file,str);
+        if (entries[i]->d_name != ".") {
+            sprintf(str, "<li>%s</li>\n", entries[i]->d_name);
+            fprintf(r->file,str);
+        }
         str[0] = 0; // resets str
         i++;
     }
