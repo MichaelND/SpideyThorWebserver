@@ -1,45 +1,22 @@
 #!/usr/bin/env python2.7
 
 import os
-import sys
-import subprocess
+from subprocess import Popen, PIPE
 
-def getTime(str):
-  data = []
-  data = str.split()
-  time = data[0]
-  return time[:-4]
+numberItems = 1
+ALPHA = [0.5, 0.75, 0.9, 1.0, 2.0, 4.0, 8.0, 16.0]
 
-def getSpace(str):
-  data = []
-  data = str.split()
-  space = data[2]
-  return space[:-4]
+print '''| NITEMS    | ALHPA    | TIME     | SPACE     |
+| --------- | -------- | -------- | --------- |'''
+       
+def display(x):
+  output = 'shuf -i1-{} -n {} | ./measure ./freq -l {}'.format(numberItems, numberItems, x)
+  o = Popen(output, stdout=PIPE, stderr=PIPE, shell=True)
+  stdout,stderr = o.communicate()
+  print '''| {}         | {}      | {} | {}  |'''.format(numberItems, x, stderr.split()[0], stderr.split()[2])
+  
+while numberItems <= 10000000:
+  for x in ALPHA:
+    display(x)
 
-ALPHAS = [0.5, 0.75, 0.9, 1.0, 2.0, 4.0, 8.0, 16.0]
-NITEMS = [1,10,100,1000,10000,100000,1000000,10000000]
-time = []
-space = []
-alpha = []
-items = []
-
-for i in NITEMS:
-  for lf in ALPHAS:
-    command = "shuf -i1-%d -n %d | ./measure ./freq -l %d > /dev/null" % (i,i,lf)
-    ps = subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-    output = ps.communicate()[0]
-    time.append(getTime(output))
-    alpha.append(str(lf))
-    space.append(getSpace(output))
-    items.append(str(i))
-
-print '-----------------------------------------------------'
-print '| NITEMS     | SORT       | TIME       | SPACE      |'
-print '|------------|------------|------------|------------|'
-data = zip(items,alpha,time,space)
-for rows in data:
-  for row in rows:
-    print '| '+row.ljust(10),
-  print '|'
-
-print '-----------------------------------------------------'
+  numberItems = numberItems * 10
