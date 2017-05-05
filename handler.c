@@ -87,6 +87,7 @@ handle_browse_request(struct request *r)
     int n;
     DIR * directory;
     char str[BUFSIZ];
+    char link[BUFSIZ];
 
     /* Open a directory for reading or scanning */
     directory = opendir(RootPath);
@@ -103,10 +104,12 @@ handle_browse_request(struct request *r)
     int i = 0;
     fprintf(r->file, "<h4>Directory:</h4>\n<ul>\n");
     while (i < n) {
-        if (entries[i]->d_name != ".") {
-            sprintf(str, "<li>%s</li>\n", entries[i]->d_name);
+        if (strcmp(entries[i]->d_name, ".")!=0) {
+            sprintf(link, r->uri, entries[i]->d_name);
+            sprintf(str, "<li><a href=\"%s\">%s</a></li>\n", link, entries[i]->d_name);
             fprintf(r->file,str);
         }
+        link[0] = 0;
         str[0] = 0; // resets str
         i++;
     }
