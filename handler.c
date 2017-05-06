@@ -139,7 +139,7 @@ handle_file_request(struct request *r)
     mimetype = determine_mimetype(r->path);
 
     /* Write HTTP Headers with OK status and determined Content-Type */
-    fprintf(r->file,"HTTP/1.0 %i\nContent-Type: %s\n\r\n", HTTP_STATUS_OK, mimetype); 
+    fprintf(r->file,"HTTP/1.0 200 OK\nContent-Type: %s\n\r\n", mimetype); 
 
     /* Read from file and write to socket in chunks */
     while ((nread = fread(buffer, sizeof(char), BUFSIZ, fs)) != 0) {

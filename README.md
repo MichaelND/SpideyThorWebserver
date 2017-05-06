@@ -72,3 +72,37 @@ socket.c - Michael and Phil
 spidey.c - Michael and Phil
 thor.py - Michael and Phil
 utils.c - Michael and Phil
+benchmark.py - Michael and Phil
+
+1 Process 10 Requests - Latency
+Processing: http://student01.cse.nd.edu:9602
+Processing: http://student01.cse.nd.edu:9602/text/hackers.txt
+Processing: http://student01.cse.nd.edu:9602/scripts/cowsay.sh
+Average Latencies of Spidey
+[Directory Listings, Static Files, CGI SCRIPTS]
+['0.0', '0.0', '0.05']
+
+1 Process 100 Requests - Latency
+Processing: http://student01.cse.nd.edu:9602
+Processing: http://student01.cse.nd.edu:9602/text/hackers.txt
+Processing: http://student01.cse.nd.edu:9602/scripts/cowsay.sh
+Average Latencies of Spidey
+[Directory Listings, Static Files, CGI SCRIPTS]
+['0.0', '0.0', '0.05']
+
+1 Process 100 Requests - Throughput (1 process and 100 requests gives 0, 0, 0 too)
+Processing: http://student01.cse.nd.edu:9602/text/1K.txt
+Processing: http://student01.cse.nd.edu:9603/text/1K.txt
+Processing: http://student01.cse.nd.edu:9603/text/1M.txt
+Processing: http://student01.cse.nd.edu:9603/text/1G.txt
+Average Throughputs of Spidey
+[1KB, 1MB, 1GB]
+[0.0, 0.0, 0.0]
+
+10 Process 100 Requests - Latency
+Processing: http://student01.cse.nd.edu:9603/text/1K.txt
+Processing: http://student01.cse.nd.edu:9603/text/1M.txt
+Processing: http://student01.cse.nd.edu:9603/text/1G.txt
+Average Throughputs of Spidey
+[1KB, 1MB, 1GB]
+[1.1249999999999999e-05, 1.125e-07, 1.125e-11]
