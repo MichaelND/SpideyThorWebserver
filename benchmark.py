@@ -4,7 +4,7 @@ import os
 import sys
 from subprocess import Popen, PIPE
 
-PROCESSES = 10
+PROCESSES = 2
 REQUESTS = 100
 
 TIMES = []

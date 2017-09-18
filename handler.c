@@ -93,7 +93,13 @@ handle_browse_request(struct request *r)
         return HTTP_STATUS_NOT_FOUND;
     }
     /* Write HTTP Header with OK Status and text/html Content-Type */
-    fprintf(r->file,"HTTP/1.0 200 OK\nContent-Type: text/html\n\r\n<html>\n<body>\n");
+    fprintf(r->file,"HTTP/1.0 200 OK\nContent-Type: text/html\n\r\n<html>\n");
+    fprintf(r->file, "<body>\n");
+    fprintf(r->file, "<head>\n");
+    fprintf(r->file, "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\">");
+    fprintf(r->file, "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js\"></script>");
+    fprintf(r->file, "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js\"></script>");
+    fprintf(r->file, "</head>\n");
 
     /* For each entry in directory, emit HTML list item */
     int i = 0;
@@ -228,7 +234,13 @@ handle_error(struct request *r, http_status status)
     const char *status_string = http_status_string(status);
 
     /* Write HTTP Header */
-    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: text/html\n\r\n<html>\n<body>\n", status_string);
+    fprintf(r->file,"HTTP/1.0 %s\nContent-Type: text/html\n\r\n<html>\n", status_string);
+    fprintf(r->file, "<head>\n");
+    fprintf(r->file, "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\">");
+    fprintf(r->file, "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js\"></script>");
+    fprintf(r->file, "<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js\"></script>");
+    fprintf(r->file, "</head>\n");
+    fprintf(r->file, "<body>\n" );
 
     /* Write HTML Description of Error*/
     if (strcmp(status_string, "400 Bad Request") == 0)
